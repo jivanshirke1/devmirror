@@ -1,212 +1,97 @@
-// DevMirror - Backend with JWT Auth + AI + Snippet Manager
+# 🪞 DevMirror – AI-Powered Developer Journal
 
-package com.devmirror;
+**DevMirror** is a full-stack Java application that helps developers document their learning journey, manage code snippets, get AI-based code reviews, and track daily productivity—all secured with JWT authentication.
 
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
+---
 
-@SpringBootApplication
-public class DevMirrorApplication {
-    public static void main(String[] args) {
-        SpringApplication.run(DevMirrorApplication.class, args);
-    }
-}
+## 🚀 Features
 
-// --- Model ---
-package com.devmirror.model;
+### 📝 Journal
+- Write and store daily developer logs
+- Track mood and progress over time
 
-import jakarta.persistence.*;
-import java.time.LocalDateTime;
+### 🧠 AI Code Review
+- Paste any code and get improvement suggestions using OpenAI (GPT-3.5)
 
-@Entity
-public class JournalEntry {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+### 🗂️ Code Snippet Manager
+- Save reusable code snippets
+- Tag by language, project, or concept
+- AI-based snippet review
 
-    private String title;
+### 🔐 Secure API with JWT
+- User registration and login
+- All journal and snippet routes protected via JWT
 
-    @Column(length = 5000)
-    private String content;
+---
 
-    private String mood;
-    private LocalDateTime timestamp = LocalDateTime.now();
+## 🧰 Tech Stack
 
-    // Getters and setters
-}
+| Layer       | Tech                          |
+|-------------|-------------------------------|
+| Backend     | Java 17, Spring Boot, JPA     |
+| Auth        | Spring Security, JWT          |
+| AI Review   | OpenAI GPT-3.5 API            |
+| Database    | PostgreSQL / H2 (local dev)   |
+| Deployment  | Docker + Render (optional)    |
 
-@Entity
-@Table(name = "users")
-public class User {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+---
 
-    private String username;
-    private String password;
+## ⚙️ Setup Instructions
 
-    // Getters and setters
-}
+### 🔧 1. Clone & Build
+```bash
+git clone https://github.com/jivanshirke1/devmirror.git
+cd devmirror
+./mvnw clean package
+```
 
-@Entity
-public class CodeSnippet {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+### 🔐 2. Configure OpenAI API
+In `application.properties`, add:
+```
+openai.api.key=sk-your-api-key
+```
 
-    private String title;
-    private String language;
-    private String tags;
+### 🐳 3. (Optional) Docker Build
+```bash
+docker build -t devmirror-app .
+docker run -p 8080:8080 devmirror-app
+```
 
-    @Column(length = 10000)
-    private String code;
+---
 
-    private LocalDateTime createdAt = LocalDateTime.now();
+## 📡 API Endpoints
 
-    // Getters and setters
-}
+### 🔐 Auth
+- `POST /api/auth/register`
+- `POST /api/auth/login`
 
-// --- Repository ---
-package com.devmirror.repository;
+### 📓 Journal
+- `GET /api/journals`
+- `POST /api/journals`
+- `DELETE /api/journals/{id}`
+- `POST /api/journals/ai/suggest`
 
-import com.devmirror.model.JournalEntry;
-import com.devmirror.model.User;
-import com.devmirror.model.CodeSnippet;
-import org.springframework.data.jpa.repository.JpaRepository;
+### 📘 Snippets
+- `GET /api/snippets`
+- `POST /api/snippets`
+- `DELETE /api/snippets/{id}`
+- `POST /api/snippets/ai-review`
 
-import java.util.Optional;
+> All endpoints require `Authorization: Bearer <token>` header (except `/api/auth/**`)
 
-public interface JournalRepository extends JpaRepository<JournalEntry, Long> {}
-public interface UserRepository extends JpaRepository<User, Long> {
-    Optional<User> findByUsername(String username);
-}
-public interface SnippetRepository extends JpaRepository<CodeSnippet, Long> {}
+---
 
-// --- Controller ---
-package com.devmirror.controller;
+## 🌐 Live Demo
 
-import com.devmirror.model.*;
-import com.devmirror.repository.*;
-import com.devmirror.service.AiService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
-import java.util.List;
+> 🔗 [https://devmirror.onrender.com](https://devmirror.onrender.com)  
+Explore the deployed version of DevMirror hosted on Render.
 
-@RestController
-@RequestMapping("/api/journals")
-public class JournalController {
-    @Autowired private JournalRepository journalRepository;
-    @Autowired private AiService aiService;
+---
 
-    @GetMapping
-    public List<JournalEntry> getAll() {
-        return journalRepository.findAll();
-    }
+## 🧑‍💻 Author
 
-    @PostMapping
-    public JournalEntry create(@RequestBody JournalEntry entry) {
-        return journalRepository.save(entry);
-    }
+**👨‍💻 Jivan Shirke**  
+📧 [jivanshirke2001@gmail.com]
 
-    @DeleteMapping("/{id}")
-    public void delete(@PathVariable Long id) {
-        journalRepository.deleteById(id);
-    }
+---
 
-    @PostMapping("/ai/suggest")
-    public String getSuggestion(@RequestBody String codeSnippet) {
-        return aiService.getSuggestion(codeSnippet);
-    }
-}
-
-@RestController
-@RequestMapping("/api/snippets")
-public class SnippetController {
-    @Autowired private SnippetRepository snippetRepository;
-    @Autowired private AiService aiService;
-
-    @GetMapping
-    public List<CodeSnippet> getAll() {
-        return snippetRepository.findAll();
-    }
-
-    @PostMapping
-    public CodeSnippet create(@RequestBody CodeSnippet snippet) {
-        return snippetRepository.save(snippet);
-    }
-
-    @DeleteMapping("/{id}")
-    public void delete(@PathVariable Long id) {
-        snippetRepository.deleteById(id);
-    }
-
-    @PostMapping("/ai-review")
-    public String aiReview(@RequestBody String code) {
-        return aiService.getSuggestion(code);
-    }
-}
-
-@RestController
-@RequestMapping("/api/auth")
-public class AuthController {
-    @Autowired private UserRepository userRepository;
-    @Autowired private JwtService jwtService;
-
-    @PostMapping("/register")
-    public String register(@RequestBody User user) {
-        user.setPassword(jwtService.encodePassword(user.getPassword()));
-        userRepository.save(user);
-        return "User registered";
-    }
-
-    @PostMapping("/login")
-    public String login(@RequestBody User user) {
-        return userRepository.findByUsername(user.getUsername())
-                .filter(u -> jwtService.matches(user.getPassword(), u.getPassword()))
-                .map(u -> jwtService.generateToken(user.getUsername()))
-                .orElse("Invalid credentials");
-    }
-}
-
-// --- AI Service ---
-package com.devmirror.service;
-
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.*;
-import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-@Service
-public class AiService {
-    @Value("${openai.api.key}")
-    private String apiKey;
-
-    public String getSuggestion(String code) {
-        RestTemplate restTemplate = new RestTemplate();
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.setBearerAuth(apiKey);
-
-        Map<String, Object> body = new HashMap<>();
-        body.put("model", "gpt-3.5-turbo");
-        body.put("messages", List.of(
-                Map.of("role", "system", "content", "You are a Java code reviewer."),
-                Map.of("role", "user", "content", "Please review this code and give suggestions: " + code)
-        ));
-
-        HttpEntity<Map<String, Object>> entity = new HttpEntity<>(body, headers);
-        ResponseEntity<Map> response = restTemplate.postForEntity("https://api.openai.com/v1/chat/completions", entity, Map.class);
-
-        if (response.getStatusCode() == HttpStatus.OK) {
-            Map<String, Object> choice = ((List<Map<String, Object>>) response.getBody().get("choices")).get(0);
-            Map<String, Object> message = (Map<String, Object>) choice.get("message");
-            return message.get("content").toString();
-        }
-        return "No suggestion available.";
-    }
-}
-
-// --- JWT and Security config remain the same ---
