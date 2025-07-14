@@ -40,7 +40,7 @@
 
 ### 🔧 1. Clone & Build
 ```bash
-git clone https://github.com/yourusername/devmirror.git
+git clone https://github.com/jivanshirke1/devmirror.git
 cd devmirror
 ./mvnw clean package
 ```
