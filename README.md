@@ -91,11 +91,4 @@ Explore the deployed version of DevMirror hosted on Render.
 ## 🧑‍💻 Author
 
 **👨‍💻 Jivan Shirke**  
-📧 [your.email@example.com]  
-🌐 [LinkedIn](https://linkedin.com/in/yourprofile)  
-📂 Portfolio: [your-portfolio-link.com](https://your-portfolio-link.com)
-
----
-
-## 📜 License
-MIT License – free to use, modify, or contribute.
+📧 [jivanshirke2001@gmail.com]
